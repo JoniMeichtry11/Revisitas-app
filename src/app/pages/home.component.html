@@ -1,1 +1,21 @@
+@if (formVisible()) {
+  <div class="fixed inset-0 bg-black/50 flex justify-center items-center z-[9999]">
+    <div class="bg-white rounded-xl shadow-lg p-6 w-[90%] max-w-md relative">
+      <button class="absolute top-2 right-2 text-gray-500" (click)="formVisible.set(false)">✖️</button>
+      <h2 class="text-xl font-semibold mb-4">📌 Revisita</h2>
+      <form (ngSubmit)="guardarPunto()" #form="ngForm" class="space-y-4">
+        <input type="date" [(ngModel)]="formData.fecha" name="fecha" class="w-full border p-2 rounded" required>
+        <input type="text" [(ngModel)]="formData.nombre" name="nombre" placeholder="Nombre" class="w-full border p-2 rounded" required>
+        <select [(ngModel)]="formData.genero" name="genero" class="w-full border p-2 rounded">
+          <option value="masculino">Masculino</option>
+          <option value="femenino">Femenino</option>
+        </select>
+        <input type="text" [(ngModel)]="formData.direccion" name="direccion" placeholder="Dirección" class="w-full border p-2 rounded" required>
+        <textarea [(ngModel)]="formData.notas" name="notas" placeholder="Notas" class="w-full border p-2 rounded"></textarea>
+        <input type="text" [(ngModel)]="formData.proximaVez" name="proximaVez" placeholder="Próxima vez" class="w-full border p-2 rounded">
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded w-full">💾 Guardar</button>
+      </form>
+    </div>
+  </div>
+}
 <div id="map" class="w-full h-screen"></div>
