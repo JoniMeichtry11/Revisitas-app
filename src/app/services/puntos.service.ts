@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { collection, addDoc, Firestore, getDocs } from '@angular/fire/firestore';
+import { collection, addDoc, Firestore, getDocs, doc, updateDoc, deleteDoc } from '@angular/fire/firestore';
 import { Punto } from '../models/Punto';
 
 export class PuntosService {
@@ -17,5 +17,15 @@ export class PuntosService {
       id: doc.id,
       ...(doc.data() as Omit<Punto, 'id'>)
     }));
+  }
+
+  async actualizarPunto(id: string, data: any) {
+    const docRef = doc(this.firestore, 'puntos', id);
+    return await updateDoc(docRef, data);
+  }
+
+  async eliminarPunto(id: string) {
+    const docRef = doc(this.firestore, 'puntos', id);
+    return await deleteDoc(docRef);
   }
 }

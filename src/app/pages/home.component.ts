@@ -25,6 +25,7 @@ export class HomeComponent implements AfterViewInit {
     notas: '',
     proximaVez: ''
   };
+  editandoPuntoId: string | undefined = undefined;
 
   constructor(private puntosService: PuntosService) {}
 
@@ -48,9 +49,14 @@ export class HomeComponent implements AfterViewInit {
         const puntos = await this.puntosService.obtenerPuntos();
 
         puntos.forEach(p => {
-          L.marker([p.lat, p.lng]).addTo(this.map)
-            .bindPopup(`${p.nombre}<br>${p.direccion}`);
+          const marker = L.marker([p.lat, p.lng]).addTo(this.map);
+          marker.on('click', () => {
+            this.formData = { ...p };
+            this.editandoPuntoId = p.id;
+            this.formVisible.set(true);
+          });
         });
+
 
         // evento de click en el mapa
         this.map.on('click', async (e: any) => {
@@ -77,15 +83,30 @@ export class HomeComponent implements AfterViewInit {
   }
 
   async guardarPunto() {
-    await this.puntosService.guardarPunto(this.formData);
+    const dataAGuardar = {
+      ...this.formData,
+      lat: Number(this.formData.lat),
+      lng: Number(this.formData.lng)
+    };
+
+    if (this.editandoPuntoId) {
+      await this.puntosService.actualizarPunto(this.editandoPuntoId, dataAGuardar);
+    } else {
+      await this.puntosService.guardarPunto(dataAGuardar);
+    }
+
+    this.editandoPuntoId = undefined;
     this.formVisible.set(false);
+    this.recargarMapa();
+  }
 
-    const L = await import('leaflet');
-    const { lat, lng } = this.formData;
-
-    L.marker([lat, lng]).addTo(this.map)
-      .bindPopup(`${this.formData.nombre}<br>${this.formData.direccion}`)
-      .openPopup();
+  async eliminarPunto() {
+    if (this.editandoPuntoId) {
+      await this.puntosService.eliminarPunto(this.editandoPuntoId);
+      this.editandoPuntoId = undefined;
+      this.formVisible.set(false);
+      this.recargarMapa();
+    }
   }
 
   async obtenerDireccion(lat: number, lng: number): Promise<string> {
@@ -95,5 +116,24 @@ export class HomeComponent implements AfterViewInit {
     const calle = addr.road || '';
     const numero = addr.house_number || '';
     return `Calle ${calle}, número ${numero}`.trim();
+  }
+
+  async recargarMapa() {
+    const L = await import('leaflet');
+    this.map.eachLayer((layer: any) => {
+      if (layer instanceof L.Marker) {
+        this.map.removeLayer(layer);
+      }
+    });
+    const puntos = await this.puntosService.obtenerPuntos();
+
+    puntos.forEach(p => {
+      const marker = L.marker([p.lat, p.lng]).addTo(this.map);
+      marker.on('click', () => {
+        this.formData = { ...p };
+        this.editandoPuntoId = p.id;
+        this.formVisible.set(true);
+      });
+    });
   }
 }

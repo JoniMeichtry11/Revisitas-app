@@ -1,5 +1,5 @@
 export interface Punto {
-  id?: string; // opcional porque no está antes de guardar
+  id?: string;
   lat: number;
   lng: number;
   fecha: string;
